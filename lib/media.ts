@@ -67,12 +67,6 @@ export const MEDIA = {
     frames: 328,
     source: { kind: "video", src: "/videos/xbox_gameplay_reel_scrub.mp4" },
   },
-  XBOX_GAME_COVERS: {
-    title: "Capas de jogos",
-    description: "Série de capas para as faixas horizontais.",
-    frames: 1,
-    source: null,
-  },
   AZURE_DATACENTER_FLYTHROUGH: {
     title: "Voo pelo datacenter",
     description: "Câmera atravessando corredores de servidores, sob a rede de regiões.",

@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useSyncExternalStore } from "react";
+import Image from "next/image";
 import { gsap } from "@/lib/gsap";
 import { beatSequence, enterTimeline, holdUntil, pinTimeline, useScene } from "@/lib/scene";
 import { ScrollMedia, type MediaHandle } from "@/components/ScrollMedia";
@@ -12,11 +13,46 @@ const BEATS = [
   { title: "Sem console, também dá", text: "Com o jogo na nuvem, a partida roda em servidores e chega à tela que você já tem." },
 ];
 
-const ROWS = [6, 6];
+type Game = { file: string; name: string };
+
+// Capas em public/images/xbox (formato de cabeçalho da Steam, 920×430).
+const GAMES: readonly Game[] = [
+  { file: "alienisolation.png", name: "Alien: Isolation" },
+  { file: "cyberpunk.png", name: "Cyberpunk 2077" },
+  { file: "farcry3.png", name: "Far Cry 3" },
+  { file: "gtav.png", name: "Grand Theft Auto V" },
+  { file: "lifeisstrange.png", name: "Life is Strange" },
+  { file: "limbo.png", name: "Limbo" },
+  { file: "outlast.png", name: "Outlast" },
+  { file: "portal2.png", name: "Portal 2" },
+  { file: "reddeadredemptionii.png", name: "Red Dead Redemption 2" },
+  { file: "sekiro.png", name: "Sekiro: Shadows Die Twice" },
+  { file: "terraria.png", name: "Terraria" },
+];
+const FIRST_ROW = 6;
+
+// Ordem embaralhada uma vez por carregamento da página. O servidor sempre
+// usa a ordem fixa; o navegador troca pela embaralhada logo na hidratação.
+let shuffledGames: readonly Game[] | null = null;
+function getShuffledGames() {
+  if (!shuffledGames) {
+    const list = [...GAMES];
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    shuffledGames = list;
+  }
+  return shuffledGames;
+}
+const getServerGames = () => GAMES;
+const subscribe = () => () => {};
 
 export function Xbox() {
   const root = useRef<HTMLElement>(null);
   const media = useRef<MediaHandle>(null);
+  const games = useSyncExternalStore(subscribe, getShuffledGames, getServerGames);
+  const rows = [games.slice(0, FIRST_ROW), games.slice(FIRST_ROW)];
 
   useScene(root, ({ reduce, mobile }) => {
     const q = gsap.utils.selector(root);
@@ -32,8 +68,9 @@ export function Xbox() {
       .fromTo(q(".xb-ring"), { scale: reduce ? 1 : 0.6, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 1.6, ease: "power2.out" }, 0.3)
       // Faixas de jogos atravessam a tela em direções opostas (parallax por velocidade).
       .fromTo(q(".xb-reel"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6 }, 2.4)
-      .fromTo(q(".xb-row-0"), { xPercent: 10 * k }, { xPercent: -45 * k, duration: 5 }, 2.4)
-      .fromTo(q(".xb-row-1"), { xPercent: -40 * k }, { xPercent: 5 * k, duration: 5 }, 2.4)
+      // Deslocamentos limitados para as faixas (6 e 5 capas) cobrirem a tela o tempo todo.
+      .fromTo(q(".xb-row-0"), { xPercent: 0 }, { xPercent: -25 * k, duration: 5 }, 2.4)
+      .fromTo(q(".xb-row-1"), { xPercent: -10 * k }, { xPercent: 0, duration: 5 }, 2.4)
       .to(q(".xb-sphere"), { scale: reduce ? 1 : mobile ? 1.5 : 1.9, xPercent: reduce ? 0 : mobile ? 0 : 18, duration: 2.4, ease: "power2.inOut" }, 5.6)
       .to(q(".xb-reel"), { autoAlpha: 0.25, duration: 1 }, 6);
 
@@ -59,24 +96,22 @@ export function Xbox() {
           </div>
         </div>
 
-        <div className="xb-reel pointer-events-none invisible absolute inset-x-0 bottom-[10svh] space-y-3 md:bottom-[8svh] md:space-y-4" aria-hidden>
-          {ROWS.map((count, r) => (
-            <div key={r} className={`xb-row-${r} flex w-max gap-3 will-change-transform md:gap-4`}>
-              {Array.from({ length: count }, (_, i) => (
-                <ScrollMedia
-                  key={i}
-                  slot="XBOX_GAME_COVERS"
-                  index={r * count + i}
-                  compact
-                  tone="dark"
-                  className="aspect-[16/9] w-[42vw] shrink-0 md:w-[19vw]"
-                />
+        <div className="xb-reel pointer-events-none invisible absolute inset-x-0 bottom-[10svh] space-y-3 md:bottom-[5svh] md:space-y-4">
+          {rows.map((row, r) => (
+            <ul key={r} className={`xb-row-${r} flex w-max gap-3 will-change-transform md:gap-4`} aria-label={r === 0 ? "Alguns jogos" : undefined}>
+              {row.map((game) => (
+                <li
+                  key={game.file}
+                  className="relative aspect-[920/430] w-[50vw] shrink-0 overflow-hidden rounded-md bg-[var(--surface)] md:w-[22vw]"
+                >
+                  <Image src={`/images/xbox/${game.file}`} alt={game.name} fill sizes="(min-width: 768px) 22vw, 50vw" className="object-cover" />
+                </li>
               ))}
-            </div>
+            </ul>
           ))}
         </div>
 
-        <div className="relative z-10 flex h-full flex-col justify-start px-4 pt-24 md:justify-center md:px-12 md:pt-0">
+        <div className="relative z-10 flex h-full flex-col justify-start px-4 pt-24 md:justify-center md:px-12 md:pt-0 md:pb-[22svh]">
           <div className="beats md:max-w-[34vw]">
             {BEATS.map((beat, i) => (
               <div key={i} className={`xb-beat xb-beat-${i}`}>
