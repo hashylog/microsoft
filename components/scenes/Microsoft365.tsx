@@ -6,116 +6,216 @@ import { beatSequence, enterTimeline, holdUntil, pinTimeline, useScene } from "@
 import { ScrollMedia, type MediaHandle } from "@/components/ScrollMedia";
 import { RevealText } from "@/components/RevealText";
 
-// Cores aproximadas de cada app, apenas para o wireframe.
-const APPS = [
-  { name: "Word", letter: "W", color: "#185ABD", text: "Escreva e revise com outras pessoas no mesmo documento, ao mesmo tempo.", from: [-46, -38, -18, 1.3] },
-  { name: "Excel", letter: "X", color: "#107C41", text: "Organize números e transforme planilhas em gráficos e decisões.", from: [-30, 44, 14, 0.8] },
-  { name: "PowerPoint", letter: "P", color: "#C43E1C", text: "Monte apresentações que contam uma história, slide a slide.", from: [6, -52, -8, 1.5] },
-  { name: "Outlook", letter: "O", color: "#0F6CBD", text: "E-mail e agenda no mesmo lugar, para planejar a semana.", from: [34, 40, 20, 0.9] },
-  { name: "Teams", letter: "T", color: "#5B5FC7", text: "Chat, reuniões e arquivos de cada equipe em um só espaço.", from: [48, -30, -16, 1.2] },
-] as const;
+// A timeline desta cena é medida em segundos do vídeo M365_SUITE.
+const VIDEO_SECONDS = 49.67;
+const END_HOLD = 1.6; // pausa no frame final, depois que a miniatura cobre a tela
+const SCREENS = 10.4; // altura total de scroll da cena (~5 s de vídeo por tela)
+
+type AppKey = "word" | "excel" | "powerpoint";
+
+const APPS: Record<AppKey, { name: string; letter: string; color: string; tint: string }> = {
+  word: { name: "Word", letter: "W", color: "#185ABD", tint: "rgba(24, 90, 189, 0.12)" },
+  excel: { name: "Excel", letter: "X", color: "#107C41", tint: "rgba(16, 124, 65, 0.12)" },
+  powerpoint: { name: "PowerPoint", letter: "P", color: "#C43E1C", tint: "rgba(196, 62, 28, 0.12)" },
+};
+
+// Qual app está em cena em cada trecho do vídeo (mapeado pelos cortes de cena).
+const SEGMENTS: { from: number; to: number; app: AppKey | null }[] = [
+  { from: 0, to: 1.43, app: "word" },
+  { from: 1.43, to: 2.8, app: "excel" },
+  { from: 2.8, to: 5.77, app: "powerpoint" },
+  { from: 5.77, to: 9.97, app: "excel" },
+  { from: 9.97, to: 15.93, app: "word" },
+  { from: 15.93, to: 20.97, app: "excel" },
+  { from: 20.97, to: 25.5, app: "powerpoint" },
+  { from: 25.5, to: 30.87, app: "word" },
+  { from: 30.87, to: 35.97, app: "powerpoint" },
+  { from: 35.97, to: 40.5, app: "excel" },
+  { from: 40.5, to: 43.17, app: "powerpoint" },
+  { from: 43.17, to: 45.77, app: "word" },
+  { from: 45.77, to: VIDEO_SECONDS, app: null }, // logo da Microsoft
+];
+
+type Side = "left" | "right" | "center";
+
+// Capítulos de texto. `frame` é o lado da miniatura; o texto fica do lado oposto.
+const CHAPTERS: { at: number; frame: Side; title: string; text: string }[] = [
+  {
+    at: 0,
+    frame: "right",
+    title: "Microsoft 365",
+    text: "Word, Excel e PowerPoint, conectados pelos mesmos arquivos e pelas mesmas pessoas.",
+  },
+  {
+    at: 6.6,
+    frame: "left",
+    title: "Do dado ao documento",
+    text: "A planilha vira gráfico, o gráfico vira relatório. Sem copiar, colar e reformatar.",
+  },
+  {
+    at: 16.6,
+    frame: "right",
+    title: "Várias pessoas, o mesmo arquivo",
+    text: "Cada colega aparece com o próprio cursor e as mudanças surgem na hora, para todo mundo.",
+  },
+  {
+    at: 26.6,
+    frame: "left",
+    title: "Comentários que viram conversa",
+    text: "Marque alguém com @, atribua uma tarefa e resolva a dúvida dentro do próprio arquivo.",
+  },
+  {
+    at: 36.6,
+    frame: "center",
+    title: "Um pacote, três ferramentas",
+    text: "Escrever, calcular e apresentar, com a mesma conta e na nuvem.",
+  },
+];
 
 export function Microsoft365() {
   const root = useRef<HTMLElement>(null);
   const media = useRef<MediaHandle>(null);
 
-  useScene(root, ({ reduce }) => {
+  useScene(root, ({ reduce, mobile }) => {
     const q = gsap.utils.selector(root);
-    const tiles = q<HTMLElement>(".m365-tile");
-    const k = reduce ? 0 : 1;
+    const stage = q(".m365-stage")[0] as HTMLElement;
+    const frame = q(".m365-frame")[0] as HTMLElement;
+
+    // Posição horizontal da miniatura (frame usa left: 0 no CSS).
+    const margin = () => (mobile ? 16 : 48);
+    const xFor = (side: Side) => () => {
+      const free = stage.clientWidth - frame.offsetWidth;
+      if (mobile || side === "center") return free / 2;
+      return side === "left" ? margin() : free - margin();
+    };
+    // Escala e deslocamento para a miniatura cobrir a tela no final.
+    const cover = () => Math.max(stage.clientWidth / frame.offsetWidth, stage.clientHeight / frame.offsetHeight) * 1.02;
+    const coverY = () => (mobile ? stage.clientHeight / 2 - (frame.offsetTop + frame.offsetHeight / 2) : 0);
 
     const enter = enterTimeline(root.current!);
     enter.from(q(".m365-beat-0 .rw"), { yPercent: 110, stagger: 0.08, duration: 0.6, ease: "power3.out" }, 0.2);
 
-    const tl = pinTimeline(root.current!, q(".m365-stage")[0], 3.4, (p) => media.current?.setProgress(p));
+    const total = VIDEO_SECONDS + END_HOLD;
+    const tl = pinTimeline(root.current!, stage, SCREENS, (p) => media.current?.setProgress(p));
 
-    tl// Os apps chegam de profundidades diferentes e se encaixam na barra.
-      .fromTo(
-        tiles,
-        {
-          xPercent: (i) => APPS[i].from[0] * 12 * k,
-          yPercent: (i) => APPS[i].from[1] * 10 * k,
-          rotate: (i) => APPS[i].from[2] * k,
-          scale: (i) => (reduce ? 1 : APPS[i].from[3]),
-        },
-        { xPercent: 0, yPercent: 0, rotate: 0, scale: 1, duration: 2.2, ease: "power3.inOut", stagger: 0.1 },
-        0,
-      )
-      .fromTo(q(".m365-doc"), { scale: reduce ? 1 : 0.7, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 1.8, ease: "power2.inOut" }, 0.8);
-
-    // Destaque de cada app, em sequência.
-    const start = 3.4;
-    const step = 1.1;
-    APPS.forEach((_, i) => {
-      const t = start + i * step;
-      tl.to(tiles, { opacity: (j) => (j === i ? 1 : 0.35), duration: 0.3 }, t)
-        .to(tiles[i], { y: -14 * k, scale: 1.12, duration: 0.3, ease: "power2.out" }, t)
-        .fromTo(q(`.m365-app-${i}`), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 }, t);
-      if (i < APPS.length - 1) {
-        tl.to(tiles[i], { y: 0, scale: 1, duration: 0.3 }, t + step - 0.15)
-          .to(q(`.m365-app-${i}`), { autoAlpha: 0, duration: 0.3 }, t + step - 0.15);
-      }
-    });
-    const end = start + APPS.length * step;
-    tl.to(tiles, { opacity: 1, y: 0, scale: 1, duration: 0.4 }, end)
-      .to(q(`.m365-app-${APPS.length - 1}`), { autoAlpha: 0, duration: 0.4 }, end);
-
-    beatSequence(
-      tl,
-      q(".m365-beat"),
-      [0, ...APPS.map((_, i) => start + i * step + 0.3), end + 0.6],
-      { reduce, dur: 0.3 },
+    tl.fromTo(
+      frame,
+      { x: xFor("right"), y: 0, yPercent: mobile ? 0 : -50, scale: 1 },
+      { x: xFor("right"), duration: 0.01 },
+      0,
     );
-    holdUntil(tl, end + 1.4);
+
+    // A miniatura troca de lado a cada capítulo e chega antes de o novo texto aparecer.
+    CHAPTERS.slice(1).forEach((ch) => {
+      tl.to(
+        frame,
+        { x: xFor(ch.frame), scale: ch.frame === "center" && !reduce && !mobile ? 1.12 : 1, duration: 1, ease: "power3.inOut" },
+        ch.at - 1.6,
+      );
+    });
+
+    // Fundo, rótulo e ícones acompanham o app que está em cena no vídeo.
+    SEGMENTS.forEach((seg) => {
+      tl.to(q(".m365-tint"), { backgroundColor: seg.app ? APPS[seg.app].tint : "rgba(255, 255, 255, 0)", duration: 0.5 }, seg.from);
+      (Object.keys(APPS) as AppKey[]).forEach((key) => {
+        const on = key === seg.app;
+        tl.to(q(`.m365-label-${key}`), { autoAlpha: on ? 1 : 0, duration: 0.3 }, seg.from);
+        // Nos primeiros 6 s os ícones acendem um de cada vez, junto com os logos do vídeo.
+        if (seg.from < 5.77) tl.to(q(`.m365-chip-${key}`), { opacity: on ? 1 : 0.25, duration: 0.3 }, seg.from);
+      });
+    });
+    tl.to(q(".m365-chip"), { opacity: 1, duration: 0.4 }, 5.77);
+
+    // Agulha da régua andando com o vídeo.
+    tl.fromTo(q(".m365-head"), { xPercent: -100 }, { xPercent: 0, duration: VIDEO_SECONDS }, 0);
+
+    beatSequence(tl, q(".m365-beat"), CHAPTERS.map((ch) => ch.at), { reduce, dur: 0.6 });
+
+    // Final: o logo sobre branco ocupa a tela e leva ao capítulo seguinte.
+    tl.to(q(".m365-beat-4"), { autoAlpha: 0, duration: 0.5 }, 45.2)
+      .to(q(".m365-rail"), { autoAlpha: 0, duration: 0.5 }, 45.4)
+      .to(frame, { x: xFor("center"), y: coverY, scale: cover, duration: 1.6, ease: "power2.inOut" }, 45.8)
+      .to(q(".m365-video"), { borderRadius: 0, duration: 1.6, ease: "power2.inOut" }, 45.8);
+    holdUntil(tl, total);
   });
 
   return (
     <section ref={root} id="microsoft-365" aria-labelledby="m365-title">
-      <div className="m365-stage relative grid h-svh grid-rows-[1fr_auto] items-center gap-6 overflow-hidden px-4 pt-20 pb-16 md:grid-cols-12 md:grid-rows-1 md:px-12 md:py-0">
-        <div className="beats md:col-span-4 md:col-start-1 md:row-start-1">
-          <div className="m365-beat m365-beat-0">
-            <h2 id="m365-title" className="t-title">
-              <RevealText text="Microsoft 365" />
-            </h2>
-            <p className="t-body mt-5">Os aplicativos que você já conhece, conectados pelos mesmos arquivos e pelas mesmas pessoas.</p>
+      <div className="m365-stage relative h-svh overflow-hidden">
+        <div className="m365-tint absolute inset-0" aria-hidden />
+
+        {CHAPTERS.map((ch, i) => (
+          <div
+            key={ch.title}
+            className={`m365-beat m365-beat-${i} absolute inset-x-4 bottom-16 md:inset-x-auto md:bottom-auto ${
+              ch.frame === "right"
+                ? "md:top-1/2 md:left-12 md:w-[min(34vw,30rem)] md:-translate-y-1/2"
+                : ch.frame === "left"
+                  ? "md:top-1/2 md:right-12 md:w-[min(34vw,30rem)] md:-translate-y-1/2"
+                  : "md:top-[7svh] md:left-1/2 md:w-[min(60vw,44rem)] md:-translate-x-1/2 md:text-center"
+            }`}
+          >
+            {i === 0 ? (
+              <>
+                <h2 id="m365-title" className="t-title">
+                  <RevealText text={ch.title} />
+                </h2>
+                <ul className="mt-6 flex gap-2.5" aria-label="Aplicativos">
+                  {(Object.keys(APPS) as AppKey[]).map((key) => (
+                    <li
+                      key={key}
+                      className={`m365-chip m365-chip-${key} grid size-10 place-items-center rounded-lg text-base font-bold text-white md:size-12 md:rounded-xl md:text-lg`}
+                      style={{ background: APPS[key].color }}
+                    >
+                      <span aria-hidden>{APPS[key].letter}</span>
+                      <span className="sr-only">{APPS[key].name}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <h3 className={`t-heading ${ch.frame === "center" ? "" : "max-w-[16ch]"}`}>{ch.title}</h3>
+            )}
+            <p className={`t-body mt-5 ${ch.frame === "center" ? "md:mx-auto" : ""}`}>{ch.text}</p>
           </div>
-          {APPS.map((app) => (
-            <div key={app.name} className="m365-beat">
-              <h3 className="t-heading">{app.name}</h3>
-              <p className="t-body mt-5">{app.text}</p>
+        ))}
+
+        {/* Miniatura + régua se movem juntas; o tamanho do contêiner é o do vídeo. */}
+        <div className="m365-frame absolute top-[14svh] left-0 aspect-video w-[calc(100%-2rem)] will-change-transform md:top-1/2 md:w-[min(52vw,calc(60svh*16/9))]">
+          <div className="m365-video h-full w-full overflow-hidden rounded-2xl shadow-[0_40px_80px_-40px_rgba(20,35,58,0.55)]">
+            <ScrollMedia
+              ref={media}
+              slot="M365_SUITE"
+              range={[0, VIDEO_SECONDS / (VIDEO_SECONDS + END_HOLD)]}
+              className="h-full w-full bg-white"
+            />
+          </div>
+
+          <div className="m365-rail absolute inset-x-0 top-full pt-4" aria-hidden>
+            <div className="mb-2 grid h-4 text-xs font-semibold">
+              {(Object.keys(APPS) as AppKey[]).map((key) => (
+                <span key={key} className={`m365-label-${key} invisible col-start-1 row-start-1 flex items-center gap-1.5`}>
+                  <span className="size-2" style={{ background: APPS[key].color }} />
+                  {APPS[key].name}
+                </span>
+              ))}
             </div>
-          ))}
-          <div className="m365-beat">
-            <h3 className="t-heading max-w-[16ch]">Tudo salvo na nuvem</h3>
-            <p className="t-body mt-5">Comece no computador, continue no celular. O arquivo é o mesmo.</p>
+            <div className="relative flex h-1.5 gap-[2px]">
+              {SEGMENTS.map((seg) => (
+                <span
+                  key={seg.from}
+                  className="h-full first:rounded-l-full last:rounded-r-full"
+                  style={{
+                    width: `${((seg.to - seg.from) / VIDEO_SECONDS) * 100}%`,
+                    background: seg.app ? APPS[seg.app].color : "var(--line)",
+                  }}
+                />
+              ))}
+              <span className="m365-head absolute inset-0">
+                <span className="absolute -top-1.5 right-0 h-[18px] w-[3px] translate-x-1/2 rounded-full bg-[var(--fg)]" />
+              </span>
+            </div>
           </div>
-        </div>
-
-        <div className="row-start-1 flex flex-col items-center gap-6 md:col-span-7 md:col-start-6 md:row-start-1 md:gap-8">
-          <div className="m365-doc relative aspect-[4/3] w-full max-w-[min(100%,calc(62svh*4/3))]">
-            <ScrollMedia ref={media} slot="M365_SUITE" className="h-full w-full" />
-            {APPS.map((app, i) => (
-              <div key={app.name} className={`m365-app-${i} invisible absolute inset-x-0 top-0`} aria-hidden>
-                <div className="flex h-8 items-center gap-2 px-3 text-xs font-semibold text-white md:h-10 md:text-sm" style={{ background: app.color }}>
-                  {app.name}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <ul className="flex gap-3 md:gap-4" aria-label="Aplicativos">
-            {APPS.map((app) => (
-              <li
-                key={app.name}
-                className="m365-tile grid size-12 place-items-center rounded-xl text-lg font-bold text-white shadow-[0_10px_30px_-12px_rgba(20,35,58,0.45)] will-change-transform md:size-16 md:rounded-2xl md:text-2xl"
-                style={{ background: app.color }}
-                title={app.name}
-              >
-                <span aria-hidden>{app.letter}</span>
-                <span className="sr-only">{app.name}</span>
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
     </section>
