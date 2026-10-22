@@ -63,9 +63,9 @@ export const MEDIA = {
   },
   XBOX_GAMEPLAY_REEL: {
     title: "Gameplay",
-    description: "Montagem de gameplay recortada dentro da esfera.",
-    frames: 300,
-    source: null,
+    description: "Voo em primeira pessoa por um cânion verde, recortado dentro da esfera.",
+    frames: 328,
+    source: { kind: "video", src: "/videos/xbox_gameplay_reel_scrub.mp4" },
   },
   XBOX_GAME_COVERS: {
     title: "Capas de jogos",
