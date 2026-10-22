@@ -1,26 +1,120 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Os valores de tema são hex para que o GSAP consiga interpolá-los. */
+  --bg: #F2F4F5;
+  --fg: #14233A;
+  --mute: #5B6878;
+  --line: #C9D0D7;
+  --surface: #E4E8EC;
+
+  --ms-red: #F25022;
+  --ms-green: #7FBA00;
+  --ms-blue: #00A4EF;
+  --ms-yellow: #FFB900;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-mute: var(--mute);
+  --color-line: var(--line);
+  --color-ms-red: var(--ms-red);
+  --color-ms-green: var(--ms-green);
+  --color-ms-blue: var(--ms-blue);
+  --color-ms-yellow: var(--ms-yellow);
+  --font-sans: var(--font-hanken);
+  --font-mono: var(--font-jetbrains);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--bg);
+  color: var(--fg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-hanken), system-ui, sans-serif;
+  font-feature-settings: "ss01";
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--ms-blue);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ms-blue);
+  outline-offset: 3px;
+}
+
+/* Escala tipográfica */
+.t-display {
+  font-size: clamp(3.5rem, 15vw, 13.5rem);
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.055em;
+}
+.t-title {
+  font-size: clamp(2.75rem, 7.2vw, 6.75rem);
+  font-weight: 750;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+.t-heading {
+  font-size: clamp(1.75rem, 3.4vw, 3rem);
+  font-weight: 650;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+}
+.t-statement {
+  font-size: clamp(2rem, 4.6vw, 4.25rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+}
+.t-body {
+  font-size: clamp(1rem, 1.15vw, 1.1875rem);
+  line-height: 1.55;
+  color: var(--mute);
+  max-width: 36ch;
+}
+
+/* Palavras para revelação (ver RevealText) */
+.rw-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+.rw {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* Tamanho do logo na abertura (lido pelo GSAP via offsetWidth) */
+.hero-stage {
+  --s: clamp(52px, min(10vw, 10svh), 118px);
+  --g: calc(var(--s) * 0.09);
+}
+
+/* Beats empilhados de texto nas cenas fixadas */
+.beats {
+  display: grid;
+}
+.beats > * {
+  grid-area: 1 / 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
