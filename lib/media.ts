@@ -61,12 +61,6 @@ export const MEDIA = {
     frames: 1490,
     source: { kind: "video", src: "/videos/m365_suite_scrub.mp4" },
   },
-  SURFACE_DEVICE_RENDER: {
-    title: "Surface em três modos",
-    description: "Render 3D do dispositivo girando de laptop para tablet e modo estúdio.",
-    frames: 360,
-    source: null,
-  },
   XBOX_GAMEPLAY_REEL: {
     title: "Gameplay",
     description: "Montagem de gameplay recortada dentro da esfera.",
