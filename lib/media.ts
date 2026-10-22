@@ -56,10 +56,10 @@ export const MEDIA = {
     source: { kind: "video", src: "/videos/windows_showcase.mp4" },
   },
   M365_SUITE: {
-    title: "Documento compartilhado",
-    description: "Sequência de telas alternando entre Word, Excel, PowerPoint, Outlook e Teams.",
-    frames: 300,
-    source: null,
+    title: "Microsoft 365 em 3D",
+    description: "Filme de 49 s com Word, Excel e PowerPoint em aparelhos 3D; termina com o logo sobre branco.",
+    frames: 1490,
+    source: { kind: "video", src: "/videos/m365_suite_scrub.mp4" },
   },
   SURFACE_DEVICE_RENDER: {
     title: "Surface em três modos",
