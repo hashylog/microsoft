@@ -9,8 +9,12 @@
  *   { kind: "video",  src: "/media/hero.mp4", poster: "/media/hero.jpg" }
  *   { kind: "frames", count: 180, path: (i) => `/media/hero/${String(i).padStart(4, "0")}.webp` }
  *
- * Dica para vídeo com scrub: exporte com keyframe a cada frame
- * (ex.: ffmpeg -g 1) para que o avanço e o retrocesso fiquem precisos.
+ * Vídeo com scrub precisa de keyframe em todo frame e sem B-frames; senão cada
+ * busca decodifica desde o último keyframe e o scroll trava. CRF 14 mantém a
+ * qualidade próxima do original (o arquivo fica ~4–5× maior):
+ *
+ *   ffmpeg -i in.mp4 -c:v libx264 -preset slow -crf 14 -g 1 -bf 0 \
+ *     -pix_fmt yuv420p -an -movflags +faststart public/videos/out.mp4
  */
 
 export type MediaSource =
@@ -28,9 +32,9 @@ export type MediaSpec = {
 export const MEDIA = {
   HERO_VIDEO: {
     title: "Abertura",
-    description: "Plano aberto que nasce dos quatro quadrados e revela pessoas usando produtos Microsoft.",
-    frames: 240,
-    source: null,
+    description: "Filme futurista de 90 s percorrido inteiro pelo scroll; termina com o logo sobre fundo preto.",
+    frames: 2160,
+    source: { kind: "video", src: "/videos/hero_video_scrub.mp4" },
   },
   ABOUT_CAMPUS: {
     title: "Campus de Redmond",
@@ -49,7 +53,7 @@ export const MEDIA = {
     title: "Área de trabalho do Windows",
     description: "Gravação de tela com janelas se organizando via Snap Layouts.",
     frames: 300,
-    source: null,
+    source: { kind: "video", src: "/videos/windows_showcase.mp4" },
   },
   M365_SUITE: {
     title: "Documento compartilhado",
