@@ -50,7 +50,8 @@ export function ScrollMedia({ slot, ref, range = [0, 1], tone = "auto", index, c
 
     if (source?.kind === "video") {
       const v = videoRef.current;
-      if (v && v.duration) {
+      // Não empilha buscas: o evento "seeked" chama draw de novo com o alvo mais recente.
+      if (v && v.duration && !v.seeking) {
         const t = p * v.duration;
         if (Math.abs(v.currentTime - t) > 1 / 60) v.currentTime = t;
       }
@@ -132,6 +133,7 @@ export function ScrollMedia({ slot, ref, range = [0, 1], tone = "auto", index, c
           playsInline
           preload="auto"
           onLoadedMetadata={draw}
+          onSeeked={draw}
           onError={() => setFailed(true)}
         />
       )}
