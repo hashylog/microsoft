@@ -6,6 +6,15 @@ import { holdUntil, pinTimeline, useScene } from "@/lib/scene";
 import { ScrollMedia, type MediaHandle } from "@/components/ScrollMedia";
 import { RevealText } from "@/components/RevealText";
 
+// Duração do scroll, em alturas de tela.
+const INTRO_SCREENS = 1.6; // logo se abre e o vídeo entra
+const VIDEO_SCREENS = 20; // percorre o vídeo inteiro (90 s ≈ 4,5 s de vídeo por tela)
+const END_HOLD_SCREENS = 0.6; // pausa no frame final (logo sobre preto)
+
+// Trecho do progresso da cena em que o vídeo vai do primeiro ao último frame.
+const VIDEO_TOTAL = INTRO_SCREENS + VIDEO_SCREENS + END_HOLD_SCREENS;
+const VIDEO_RANGE: [number, number] = [INTRO_SCREENS / VIDEO_TOTAL, (INTRO_SCREENS + VIDEO_SCREENS) / VIDEO_TOTAL];
+
 const QUADS = [
   { color: "var(--ms-red)", col: 0, row: 0 },
   { color: "var(--ms-green)", col: 1, row: 0 },
@@ -43,9 +52,11 @@ export function Hero() {
       };
     };
 
-    const tl = pinTimeline(root.current!, stage, 2.6, (p) => media.current?.setProgress(p));
-    tl.to(q(".hero-title"), { yPercent: reduce ? 0 : -40, autoAlpha: 0, duration: 1.2 }, 0)
-      .fromTo(q(".hero-sub"), { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.6, immediateRender: false }, 0)
+    // Cada unidade da timeline equivale a uma altura de tela de scroll.
+    const total = INTRO_SCREENS + VIDEO_SCREENS + END_HOLD_SCREENS;
+    const tl = pinTimeline(root.current!, stage, total, (p) => media.current?.setProgress(p));
+    tl.to(q(".hero-title"), { yPercent: reduce ? 0 : -40, autoAlpha: 0, duration: 0.4 }, 0)
+      .fromTo(q(".hero-sub"), { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.25, immediateRender: false }, 0)
       .to(
         quads,
         {
@@ -53,26 +64,24 @@ export function Hero() {
           y: (i) => toQuadrant(i).y,
           scaleX: (i) => toQuadrant(i).scaleX,
           scaleY: (i) => toQuadrant(i).scaleY,
-          duration: 3,
+          duration: INTRO_SCREENS * 0.7,
           ease: "power3.inOut",
-          stagger: 0.12,
+          stagger: 0.05,
         },
-        0.3,
+        0.1,
       )
       .fromTo(
         q(".hero-media"),
-        { autoAlpha: 0, scale: reduce ? 1 : 1.12 },
-        { autoAlpha: 1, scale: 1, duration: 1.2, ease: "power2.out" },
-        3.9,
-      )
-      .from(q(".hero-headline .rw"), { yPercent: 110, duration: 1, stagger: 0.08, ease: "power3.out" }, 4.8)
-      .to(q(".hero-media"), { scale: reduce ? 1 : 0.94, duration: 1.4, ease: "power1.inOut" }, 6.9);
-    holdUntil(tl, 8.6);
+        { autoAlpha: 0, scale: reduce ? 1 : 1.08 },
+        { autoAlpha: 1, scale: 1, duration: INTRO_SCREENS * 0.25, ease: "power2.out" },
+        INTRO_SCREENS * 0.75,
+      );
+    holdUntil(tl, total);
   });
 
   return (
     <section ref={root} id="inicio" aria-label="Início">
-      <div className="hero-stage relative h-svh overflow-hidden">
+      <div className="hero-stage relative h-svh overflow-hidden bg-black text-[#EEF2F5]">
         {QUADS.map((quad, i) => (
           <div
             key={i}
@@ -94,17 +103,12 @@ export function Hero() {
             <RevealText text="Microsoft" />
           </h1>
           <p className="hero-sub t-body mt-6 text-center">
-            Uma história de cinquenta anos contada em quatro cores. Role para começar.
+            Uma história de cinquenta anos.
           </p>
         </div>
 
-        <div className="hero-media invisible absolute inset-0">
-          <ScrollMedia ref={media} slot="HERO_VIDEO" tone="dark" className="h-full w-full" />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0D1B2E]/90 to-transparent px-4 pt-32 pb-14 md:px-12 md:pb-16">
-            <h2 className="hero-headline t-statement max-w-[18ch] text-[#EEF2F5]">
-              <RevealText text="Desde 1975, a aposta é a mesma: software que amplia o que as pessoas conseguem fazer." />
-            </h2>
-          </div>
+        <div className="hero-media invisible absolute inset-0 bg-black">
+          <ScrollMedia ref={media} slot="HERO_VIDEO" range={VIDEO_RANGE} tone="dark" className="h-full w-full bg-black" />
         </div>
       </div>
     </section>

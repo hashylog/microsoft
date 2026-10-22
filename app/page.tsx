@@ -2,7 +2,6 @@ import { SmoothScroll } from "@/components/SmoothScroll";
 import { ChapterNav } from "@/components/ChapterNav";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/scenes/Hero";
-import { About } from "@/components/scenes/About";
 import { Windows } from "@/components/scenes/Windows";
 import { Microsoft365 } from "@/components/scenes/Microsoft365";
 import { Surface } from "@/components/scenes/Surface";
@@ -17,7 +16,6 @@ export default function Home() {
       <SmoothScroll />
       <main>
         <Hero />
-        <About />
         <Windows />
         <Microsoft365 />
         <Surface />
