@@ -68,7 +68,7 @@ export function ChapterNav() {
             </span>
             Microsoft
           </button>
-          <p className="text-xs text-[var(--mute)]">Projeto acadêmico, sem vínculo oficial</p>
+          <p className="text-xs text-[var(--mute)]">TECH CAMPS 2026</p>
         </div>
       </header>
 
