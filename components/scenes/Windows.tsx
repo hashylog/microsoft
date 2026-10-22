@@ -37,7 +37,8 @@ export function Windows() {
     const screen = q(".win-screen")[0] as HTMLElement;
     const panes = q<HTMLElement>(".win-pane");
 
-    // Painéis são elementos do tamanho da tela escalados via transform.
+    // Painéis animam largura/altura reais (não scale) para o blur e as bordas
+    // do vidro não deformarem. São só 4 elementos, então o custo é pequeno.
     const logo = (i: number) => {
       const W = screen.clientWidth;
       const H = screen.clientHeight;
@@ -48,15 +49,15 @@ export function Windows() {
       return {
         x: W / 2 + (col ? g / 2 : -g / 2 - s),
         y: H / 2 + (row ? g / 2 : -g / 2 - s),
-        scaleX: s / W,
-        scaleY: s / H,
+        width: s,
+        height: s,
       };
     };
     const snap = (layout: Rect[]) => ({
       x: (i: number) => layout[i][0] * screen.clientWidth,
       y: (i: number) => layout[i][1] * screen.clientHeight,
-      scaleX: (i: number) => layout[i][2],
-      scaleY: (i: number) => layout[i][3],
+      width: (i: number) => layout[i][2] * screen.clientWidth,
+      height: (i: number) => layout[i][3] * screen.clientHeight,
     });
 
     const enter = enterTimeline(root.current!);
@@ -73,16 +74,22 @@ export function Windows() {
       .fromTo(
         panes,
         {
-          transformOrigin: "0 0",
           x: (i: number) => logo(i).x,
           y: (i: number) => logo(i).y,
-          scaleX: (i: number) => logo(i).scaleX,
-          scaleY: (i: number) => logo(i).scaleY,
+          width: (i: number) => logo(i).width,
+          height: (i: number) => logo(i).height,
         },
         { ...snap(SNAP_A), duration: 1.8, ease: "power3.inOut", stagger: 0.08 },
         2,
       )
-      .to(panes, { backgroundColor: "rgba(238, 242, 245, 0.92)", duration: 1 }, 2.6)
+      // Do azul sólido do logo para o vidro translúcido das janelas.
+      .fromTo(
+        panes,
+        { backgroundColor: "rgba(0, 164, 239, 1)", borderRadius: 0 },
+        { backgroundColor: "rgba(255, 255, 255, 0.1)", borderRadius: 10, duration: 1 },
+        2.6,
+      )
+      .fromTo(q(".win-glass"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8 }, 2.8)
       .fromTo(q(".win-chrome"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8 }, 2.4)
       .fromTo(q(".win-wallpaper"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 1 }, 2.4)
       .fromTo(q(".win-taskbar"), { yPercent: 100 }, { yPercent: 0, duration: 0.8, ease: "power2.out" }, 3)
@@ -111,18 +118,27 @@ export function Windows() {
         </div>
 
         <div className="row-start-1 [perspective:1400px] md:col-span-7 md:col-start-6 md:row-start-1">
-          <div className="win-tilt [transform-style:preserve-3d]">
+          <div className="win-tilt">
             <div className="win-screen relative aspect-[16/10] w-full">
               <div className="win-wallpaper absolute inset-0">
-                <ScrollMedia ref={media} slot="WINDOWS_SHOWCASE" tone="dark" className="h-full w-full" />
+                {/* O fundo só aparece a partir de 30% da cena; o clipe começa ali. */}
+                <ScrollMedia ref={media} slot="WINDOWS_SHOWCASE" range={[0.3, 1]} tone="dark" className="h-full w-full" />
               </div>
               <div className="win-chrome pointer-events-none absolute -inset-2 border border-[var(--line)] md:-inset-3" aria-hidden />
               {[0, 1, 2, 3].map((i) => (
                 <div
                   key={i}
                   aria-hidden
-                  className="win-pane absolute top-0 left-0 h-full w-full bg-[var(--ms-blue)] will-change-transform"
-                />
+                  className="win-pane absolute top-0 left-0 overflow-hidden bg-[var(--ms-blue)] backdrop-blur-xl backdrop-saturate-150 will-change-transform"
+                >
+                  <div className="win-glass invisible absolute inset-0 rounded-[inherit] border border-white/30 bg-[linear-gradient(135deg,rgba(255,255,255,0.22),rgba(255,255,255,0)_45%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_24px_48px_-24px_rgba(0,0,0,0.6)]">
+                    <div className="flex h-6 items-center justify-end gap-3 border-b border-white/15 bg-white/5 px-2.5 md:h-7">
+                      <span className="h-px w-2 bg-white/70" />
+                      <span className="size-2 border border-white/70" />
+                      <span className="relative size-2 before:absolute before:inset-x-0 before:top-1/2 before:h-px before:rotate-45 before:bg-white/70 after:absolute after:inset-x-0 after:top-1/2 after:h-px after:-rotate-45 after:bg-white/70" />
+                    </div>
+                  </div>
+                </div>
               ))}
               <div className="absolute inset-x-0 bottom-0 overflow-hidden" aria-hidden>
                 <div className="win-taskbar flex h-[7%] min-h-5 items-center justify-center gap-1.5 bg-[#0D1B2E]/80 backdrop-blur-sm">
