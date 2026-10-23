@@ -14,10 +14,14 @@ type Props = {
   /** Trecho do progresso da cena que corresponde ao clipe inteiro. */
   range?: [number, number];
   /** "auto" herda as cores do tema atual; "dark" simula um quadro de vídeo. */
-  tone?: "auto" | "dark";
+  tone?: "auto" | "dark" | "none";
   /** Índice opcional quando o slot representa uma série (ex.: capas). */
   index?: number;
   compact?: boolean;
+  /** "contain" mostra o vídeo inteiro (bom quando o fundo do vídeo é liso). Padrão: "cover". */
+  objectFit?: "cover" | "contain";
+  /** Alinhamento do vídeo ao ser recortado (CSS object-position). Padrão: centro. */
+  objectPosition?: string;
   className?: string;
 };
 
@@ -31,7 +35,7 @@ const pad = (n: number, len: number) => String(n).padStart(len, "0");
  * - Sequência de frames: desenha o frame correspondente em um canvas.
  * Se o asset falhar ao carregar, volta para o placeholder.
  */
-export function ScrollMedia({ slot, ref, range = [0, 1], tone = "auto", index, compact, className = "" }: Props) {
+export function ScrollMedia({ slot, ref, range = [0, 1], tone = "auto", index, compact, objectFit = "cover", objectPosition, className = "" }: Props) {
   const spec = getMedia(slot);
   const [failed, setFailed] = useState(false);
   const source = failed ? null : spec.source;
@@ -113,8 +117,9 @@ export function ScrollMedia({ slot, ref, range = [0, 1], tone = "auto", index, c
     }
   }, [source, draw]);
 
+  // "none" deixa o fundo por conta de quem usa (via className).
   const toneClass =
-    tone === "dark" ? "bg-[#16283F] text-[#EEF2F5]" : "bg-[var(--surface)] text-[var(--fg)]";
+    tone === "dark" ? "bg-[#16283F] text-[#EEF2F5]" : tone === "auto" ? "bg-[var(--surface)] text-[var(--fg)]" : "";
 
   return (
     <div
@@ -126,7 +131,8 @@ export function ScrollMedia({ slot, ref, range = [0, 1], tone = "auto", index, c
       {source?.kind === "video" && (
         <video
           ref={videoRef}
-          className="absolute inset-0 h-full w-full object-cover"
+          className={`absolute inset-0 h-full w-full ${objectFit === "contain" ? "object-contain" : "object-cover"}`}
+          style={objectPosition ? { objectPosition } : undefined}
           src={source.src}
           poster={source.poster}
           muted
