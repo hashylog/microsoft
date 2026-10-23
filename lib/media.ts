@@ -49,11 +49,17 @@ export const MEDIA = {
   TIMELINE_2010: { title: "2010", description: "Datacenter da primeira geração do Azure.", frames: 1, source: null },
   TIMELINE_2012: { title: "2012", description: "Primeiro Surface com teclado.", frames: 1, source: null },
   TIMELINE_2023: { title: "2023", description: "Interface do Copilot.", frames: 1, source: null },
-  WINDOWS_SHOWCASE: {
-    title: "Área de trabalho do Windows",
-    description: "Gravação de tela com janelas se organizando via Snap Layouts.",
-    frames: 300,
-    source: { kind: "video", src: "/videos/windows_showcase.mp4" },
+  WINDOWS_START: {
+    title: "Logo do Windows 11",
+    description: "Logo do Windows 11 surgindo sobre fundo cinza-claro.",
+    frames: 127,
+    source: { kind: "video", src: "/videos/windows_start_scrub.mp4" },
+  },
+  WINDOWS_BLOOM: {
+    title: "Bloom do Windows 11",
+    description: "A flor do papel de parede do Windows 11 nascendo de baixo e girando devagar.",
+    frames: 152,
+    source: { kind: "video", src: "/videos/windows_bloom_scrub.mp4" },
   },
   M365_SUITE: {
     title: "Microsoft 365 em 3D",
