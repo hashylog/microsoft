@@ -9,8 +9,6 @@ export const CHAPTERS = [
   { id: "inicio", label: "Início", theme: "dark" },
   { id: "sobre", label: "História", theme: "dark" },
   { id: "windows", label: "Windows", theme: "light" },
-  { id: "microsoft-365", label: "Microsoft 365", theme: "light" },
-  { id: "surface", label: "Surface", theme: "light" },
   { id: "xbox", label: "Xbox", theme: "dark" },
   { id: "azure", label: "Azure", theme: "dark" },
   { id: "copilot", label: "Copilot", theme: "light" },

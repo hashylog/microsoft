@@ -4,8 +4,6 @@ import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/scenes/Hero";
 import { About } from "@/components/scenes/About";
 import { Windows } from "@/components/scenes/Windows";
-import { Microsoft365 } from "@/components/scenes/Microsoft365";
-import { Surface } from "@/components/scenes/Surface";
 import { Xbox } from "@/components/scenes/Xbox";
 import { Azure } from "@/components/scenes/Azure";
 import { Copilot } from "@/components/scenes/Copilot";
@@ -19,8 +17,6 @@ export default function Home() {
         <Hero />
         <About />
         <Windows />
-        <Microsoft365 />
-        <Surface />
         <Xbox />
         <Azure />
         <Copilot />

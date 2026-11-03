@@ -79,7 +79,7 @@ export function Xbox() {
   });
 
   return (
-    <section ref={root} id="xbox" aria-labelledby="xbox-title">
+    <section ref={root} id="xbox" aria-labelledby="xbox-title" className="bg-[#0D1B2E] text-[#EEF2F5]">
       <div className="xb-stage relative h-svh overflow-hidden">
         <div className="absolute inset-0 grid place-items-center md:place-items-center md:pl-[30vw]" aria-hidden>
           <div className="relative size-[min(70vw,52svh)]">
