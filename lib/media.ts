@@ -36,29 +36,11 @@ export const MEDIA = {
     frames: 2160,
     source: { kind: "video", src: "/videos/hero_video_scrub.mp4" },
   },
-  WINDOWS_START: {
-    title: "Logo do Windows 11",
-    description: "Logo do Windows 11 surgindo sobre fundo cinza-claro.",
-    frames: 127,
-    source: { kind: "video", src: "/videos/windows_start_scrub.mp4" },
-  },
-  WINDOWS_BLOOM: {
-    title: "Bloom do Windows 11",
-    description: "A flor do papel de parede do Windows 11 nascendo de baixo e girando devagar.",
-    frames: 152,
-    source: { kind: "video", src: "/videos/windows_bloom_scrub.mp4" },
-  },
   M365_SUITE: {
     title: "Microsoft 365 em 3D",
     description: "Filme de 49 s com Word, Excel e PowerPoint em aparelhos 3D; termina com o logo sobre branco.",
     frames: 1490,
     source: { kind: "video", src: "/videos/m365_suite_scrub.mp4" },
-  },
-  XBOX_GAMEPLAY_REEL: {
-    title: "Gameplay",
-    description: "Voo em primeira pessoa por um cânion verde, recortado dentro da esfera.",
-    frames: 328,
-    source: { kind: "video", src: "/videos/xbox_gameplay_reel_scrub.mp4" },
   },
   AZURE_DATACENTER_FLYTHROUGH: {
     title: "Voo pelo datacenter",

@@ -3,8 +3,6 @@ import { ChapterNav } from "@/components/ChapterNav";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/scenes/Hero";
 import { About } from "@/components/scenes/About";
-import { Windows } from "@/components/scenes/Windows";
-import { Xbox } from "@/components/scenes/Xbox";
 import { Azure } from "@/components/scenes/Azure";
 import { Copilot } from "@/components/scenes/Copilot";
 import { Future } from "@/components/scenes/Future";
@@ -16,8 +14,6 @@ export default function Home() {
       <main>
         <Hero />
         <About />
-        <Windows />
-        <Xbox />
         <Azure />
         <Copilot />
         <Future />
