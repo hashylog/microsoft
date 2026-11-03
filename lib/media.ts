@@ -36,12 +36,6 @@ export const MEDIA = {
     frames: 2160,
     source: { kind: "video", src: "/videos/hero_video_scrub.mp4" },
   },
-  M365_SUITE: {
-    title: "Microsoft 365 em 3D",
-    description: "Filme de 49 s com Word, Excel e PowerPoint em aparelhos 3D; termina com o logo sobre branco.",
-    frames: 1490,
-    source: { kind: "video", src: "/videos/m365_suite_scrub.mp4" },
-  },
   AZURE_DATACENTER_FLYTHROUGH: {
     title: "Voo pelo datacenter",
     description: "Câmera atravessando corredores de servidores, sob a rede de regiões.",
