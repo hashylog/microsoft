@@ -16,12 +16,14 @@ export const metadata: Metadata = {
   title: "Microsoft",
   description:
     "Apresentação Microsoft Tech Camps 2026.",
+  icons: {
+    icon: { url: "/microsoft.svg", type: "image/svg+xml" },
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="pt-BR" className={`${hanken.variable} ${jetbrains.variable} antialiased`}>
-      <link rel="icon" href="https://www.microsoft.com/favicon.ico?v2" type="image/x-icon"></link>
       <body>{children}</body>
     </html>
   );
