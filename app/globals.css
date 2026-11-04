@@ -110,6 +110,21 @@ body {
   grid-area: 1 / 1;
 }
 
+/* Texto com gradiente animado (Copilot). */
+.aurora-text {
+  background-image: linear-gradient(100deg, #3B82F6, #22D3EE, #84CC16, #FBBF24, #F472B6, #8B5CF6, #3B82F6);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: aurora-shift 9s linear infinite;
+}
+@keyframes aurora-shift {
+  to {
+    background-position: 300% 0;
+  }
+}
+
 /* Granulação de filme animada sobre o vídeo do Hero: mantém o quadro "vivo"
    mesmo com o scroll parado. Maior que a tela para poder se deslocar. */
 .film-grain {

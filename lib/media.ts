@@ -36,12 +36,6 @@ export const MEDIA = {
     frames: 2160,
     source: { kind: "video", src: "/videos/hero_video_scrub.mp4" },
   },
-  COPILOT_ANIMATION: {
-    title: "Animação do Copilot",
-    description: "Loop do símbolo do Copilot reagindo ao texto digitado.",
-    frames: 320,
-    source: null,
-  },
   FUTURE_MONTAGE: {
     title: "Montagem final",
     description: "Cortes rápidos de todos os capítulos antes do logo se reagrupar.",
