@@ -32,15 +32,11 @@ export type MediaSpec = {
 export const MEDIA = {
   HERO_VIDEO: {
     title: "Abertura",
-    description: "Filme futurista de 90 s percorrido inteiro pelo scroll; termina com o logo sobre fundo preto.",
-    frames: 2160,
-    source: { kind: "video", src: "/videos/hero_video_scrub.mp4" },
-  },
-  FUTURE_MONTAGE: {
-    title: "Montagem final",
-    description: "Cortes rápidos de todos os capítulos antes do logo se reagrupar.",
-    frames: 200,
-    source: null,
+    description: "Filme de 75 s percorrido inteiro pelo scroll; termina com o logo sobre fundo preto.",
+    frames: 1801,
+    // Muito detalhe: keyframe a cada 4 frames e CRF 16 (~100 MB, SSIM 0,997);
+    // tudo keyframe (-g 1) passaria de 250 MB.
+    source: { kind: "video", src: "/videos/hero.mp4" },
   },
 } satisfies Record<string, MediaSpec>;
 

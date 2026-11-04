@@ -1,11 +1,13 @@
 "use client";
 
 import { useRef } from "react";
-import { gsap } from "@/lib/gsap";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { holdUntil, pinTimeline, useScene } from "@/lib/scene";
-import { ScrollMedia, type MediaHandle } from "@/components/ScrollMedia";
 import { RevealText } from "@/components/RevealText";
 import { scrollToTarget } from "@/lib/scroll";
+
+/** Montagem final (o filme antigo do Hero), tocando sozinha em loop enquanto a cena está na tela. */
+const MONTAGE_SRC = "/videos/future_montage.mp4";
 
 // Cada quadrado vem de um canto distante e volta ao lugar no logo.
 const SQUARES = [
@@ -17,13 +19,13 @@ const SQUARES = [
 
 export function Future() {
   const root = useRef<HTMLElement>(null);
-  const media = useRef<MediaHandle>(null);
+  const video = useRef<HTMLVideoElement>(null);
 
   useScene(root, ({ reduce }) => {
     const q = gsap.utils.selector(root);
     const k = reduce ? 0 : 1;
 
-    const tl = pinTimeline(root.current!, q(".ft-stage")[0], 2.4, (p) => media.current?.setProgress(p));
+    const tl = pinTimeline(root.current!, q(".ft-stage")[0], 2.4);
 
     tl.fromTo(q(".ft-media"), { scale: reduce ? 1 : 1.06 }, { scale: 1, duration: 1.6 }, 0)
       .to(q(".ft-media"), { autoAlpha: 0, scale: reduce ? 1 : 0.9, duration: 1.2 }, 2.4)
@@ -42,13 +44,34 @@ export function Future() {
       .from(q(".ft-title .rw"), { yPercent: 110, duration: 0.8, stagger: 0.06, ease: "power3.out" }, 4.2)
       .fromTo(q(".ft-cta"), { autoAlpha: 0, y: reduce ? 0 : 16 }, { autoAlpha: 1, y: 0, duration: 0.6 }, 5);
     holdUntil(tl, 6.4);
+
+    const v = video.current;
+    ScrollTrigger.create({
+      trigger: root.current,
+      start: "top bottom",
+      end: "bottom top",
+      onToggle: (self) => {
+        if (!v) return;
+        if (self.isActive) v.play().catch(() => {});
+        else v.pause();
+      },
+    });
   });
 
   return (
     <section ref={root} id="futuro" aria-labelledby="futuro-title">
       <div className="ft-stage relative grid h-svh place-items-center overflow-hidden px-4">
         <div className="ft-media absolute inset-4 md:inset-12">
-          <ScrollMedia ref={media} slot="FUTURE_MONTAGE" tone="dark" className="h-full w-full" />
+          <video
+            ref={video}
+            className="h-full w-full bg-black object-cover"
+            src={MONTAGE_SRC}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-hidden
+          />
         </div>
 
         <div className="relative flex flex-col items-center text-center">

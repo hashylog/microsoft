@@ -3,8 +3,10 @@
 import { gsap } from "@/lib/gsap";
 import { RevealText } from "@/components/RevealText";
 
-/** Tinta escura para as cenas claras (lilás) do vídeo. */
-const INK = "#1E1B3F";
+/** Tinta escura para as cenas claras do vídeo. */
+const INK = "#14233A";
+/** Texto claro para as cenas escuras, com sombra suave para destacar do fundo. */
+const LIGHT = { color: "#fff", textShadow: "0 2px 28px rgba(0,0,0,0.35)" };
 
 /** Divide em letras animáveis (`.ch`), mantendo os espaços. */
 function Chars({ text, className = "" }: { text: string; className?: string }) {
@@ -28,8 +30,8 @@ const CHIPS = ["Pessoas", "conectadas", "em qualquer lugar"];
 export function HeroCaptions() {
   return (
     <div className="hero-captions pointer-events-none absolute inset-0 will-change-transform">
-      {/* 1–8 s: dunas lilás */}
-      <div className="cap-imagine absolute bottom-[16svh] left-4 md:left-[6vw]" style={{ color: INK }}>
+      {/* 2,6–9 s: paisagem ao amanhecer */}
+      <div className="cap-imagine absolute bottom-[16svh] left-4 md:left-[6vw]" style={LIGHT}>
         <p className="cap-imagine-word text-[clamp(4rem,14vw,12.5rem)] leading-[0.85] font-[750] tracking-[-0.05em]">
           <Chars text="Imagine" />
         </p>
@@ -40,24 +42,24 @@ export function HeroCaptions() {
         />
       </div>
 
-      {/* 10–14 s: escultura de cristal */}
+      {/* 10–13 s: cubo de vidro sobre a paisagem */}
       <p
         className="cap-flow absolute top-[18svh] left-4 text-[clamp(2.4rem,6.5vw,6rem)] leading-none font-[700] tracking-[-0.045em] md:left-[6vw]"
-        style={{ color: INK }}
+        style={LIGHT}
       >
         <Chars text="Tecnologia que flui." />
       </p>
 
-      {/* 16–24 s: sala calma */}
+      {/* 22–30 s: salas de luz colorida */}
       <div
         className="cap-focus absolute right-4 bottom-[18svh] text-right text-[clamp(2.4rem,6vw,5.5rem)] leading-[0.95] font-[750] tracking-[-0.045em] md:right-[7vw]"
-        style={{ color: INK }}
+        style={LIGHT}
       >
         <RevealText as="p" className="cap-focus-a" text="Menos ruído." />
         <RevealText as="p" className="cap-focus-b" text="Mais foco." />
       </div>
 
-      {/* 39–51 s: mãos e mensagens flutuando */}
+      {/* 63–70 s: ícones dos apps sobre pedestais */}
       <div className="cap-chips absolute inset-x-4 top-[20svh] flex flex-wrap items-center justify-center gap-3 md:gap-4">
         {CHIPS.map((word) => (
           <span key={word} className="cap-chip inline-block">
@@ -71,17 +73,17 @@ export function HeroCaptions() {
         ))}
       </div>
 
-      {/* 52–55 s: fundo escuro com rabiscos */}
+      {/* 47–54 s: cubos se montando */}
       <p className="cap-create absolute top-1/2 left-4 -translate-y-1/2 text-[clamp(3rem,9vw,8.5rem)] leading-none font-[800] tracking-[-0.05em] md:left-[6vw]">
-        <span className="cap-create-stroke block text-transparent [-webkit-text-stroke:1.5px_rgba(255,255,255,0.9)]">
+        <span className="cap-create-stroke block text-transparent [-webkit-text-stroke:1.5px_#14233A]">
           <Chars text="Crie sem limites." />
         </span>
-        <span className="cap-create-fill absolute inset-0 block text-white" aria-hidden>
+        <span className="cap-create-fill absolute inset-0 block" style={{ color: INK }} aria-hidden>
           Crie sem limites.
         </span>
       </p>
 
-      {/* 69–77 s: prismas de cristal */}
+      {/* 14–20 s: aparelho com ícones acesos */}
       <p
         className="cap-prism absolute inset-x-4 top-[14svh] text-center text-[clamp(2.4rem,7vw,6.5rem)] leading-none font-[750] tracking-[-0.045em]"
         aria-label="Do software ao hardware."
@@ -97,7 +99,7 @@ export function HeroCaptions() {
         </span>
       </p>
 
-      {/* 86 s → fim: logo sobre preto */}
+      {/* 72,6 s → fim: logo sobre preto */}
       <p className="cap-since absolute inset-x-0 top-[calc(50%+3.2rem)] text-center font-mono text-xs tracking-[0.5em] text-white/70 uppercase md:text-sm">
         <Chars text="Desde 1975" />
       </p>
@@ -126,44 +128,44 @@ export function animateCaptions(tl: gsap.core.Timeline, root: HTMLElement, { at,
     q(".cap-imagine-word"),
     { letterSpacing: m ? "0.35em" : "-0.05em" },
     { letterSpacing: "-0.05em", duration: span(3), ease: "power3.out" },
-    at(1),
+    at(2.6),
   )
     .fromTo(
       q(".cap-imagine-word .ch"),
       { ...hidden, filter: blur(24), yPercent: 20 * m },
       { autoAlpha: 1, filter: blur(0), yPercent: 0, duration: span(2), stagger: span(0.18), ease: "power2.out" },
-      at(1),
+      at(2.6),
     )
     .fromTo(
       q(".cap-imagine-sub .rw"),
       { yPercent: 110 },
       { yPercent: 0, duration: span(1.2), stagger: span(0.12), ease: "power3.out" },
-      at(3.4),
+      at(4.8),
     )
-    .to(q(".cap-imagine"), { autoAlpha: 0, filter: blur(14), y: -40 * m, duration: span(1.2), ease: "power2.in" }, at(7.2));
+    .to(q(".cap-imagine"), { autoAlpha: 0, filter: blur(14), y: -40 * m, duration: span(1.2), ease: "power2.in" }, at(8.4));
 
   // 2. Tecnologia que flui: letras entram em onda e saem pelo alto.
   tl.fromTo(
     q(".cap-flow .ch"),
     { ...hidden, yPercent: 110 * m, rotate: 14 * m },
     { autoAlpha: 1, yPercent: 0, rotate: 0, duration: span(1), stagger: { each: span(0.05), ease: "sine.inOut" }, ease: "back.out(1.6)" },
-    at(9.9),
+    at(10),
   ).to(
     q(".cap-flow .ch"),
     { autoAlpha: 0, yPercent: -90 * m, rotate: -10 * m, duration: span(0.8), stagger: span(0.03), ease: "power2.in" },
-    at(13),
+    at(12.8),
   );
 
   // 3. Menos ruído / Mais foco: a primeira linha "apaga" quando a segunda chega.
-  tl.fromTo(q(".cap-focus-a .rw"), { yPercent: 110 }, { yPercent: 0, duration: span(1), stagger: span(0.15), ease: "power3.out" }, at(16.4))
-    .to(q(".cap-focus-a"), { opacity: 0.22, filter: blur(5), duration: span(1.2) }, at(19.4))
+  tl.fromTo(q(".cap-focus-a .rw"), { yPercent: 110 }, { yPercent: 0, duration: span(1), stagger: span(0.15), ease: "power3.out" }, at(21.9))
+    .to(q(".cap-focus-a"), { opacity: 0.22, filter: blur(5), duration: span(1.2) }, at(25))
     .fromTo(
       q(".cap-focus-b .rw"),
       { yPercent: 110, scale: 1 + 0.15 * m },
       { yPercent: 0, scale: 1, duration: span(1.1), stagger: span(0.15), ease: "power3.out" },
-      at(19.6),
+      at(25.2),
     )
-    .to(q(".cap-focus"), { autoAlpha: 0, y: -30 * m, duration: span(1), ease: "power2.in" }, at(23.3));
+    .to(q(".cap-focus"), { autoAlpha: 0, y: -30 * m, duration: span(1), ease: "power2.in" }, at(29.2));
 
   // 4. Balões de vidro: voam de pontos espalhados, flutuam e se espalham de novo.
   const chips = q<HTMLElement>(".cap-chip");
@@ -177,8 +179,8 @@ export function animateCaptions(tl: gsap.core.Timeline, root: HTMLElement, { at,
       chip,
       { ...hidden, ...scatter(i, 1), scale: 0.6 },
       { autoAlpha: 1, x: 0, y: 0, rotate: 0, scale: 1, duration: span(2.2), ease: "expo.out" },
-      at(39.6 + i * 1.1),
-    ).to(chip, { autoAlpha: 0, ...scatter(i, -1.3), scale: 0.8, duration: span(1.6), ease: "power2.in" }, at(49 + i * 0.35));
+      at(63.2 + i * 1.1),
+    ).to(chip, { autoAlpha: 0, ...scatter(i, -1.3), scale: 0.8, duration: span(1.6), ease: "power2.in" }, at(69.4 + i * 0.3));
   });
 
   // 5. Crie sem limites: o contorno aparece e o preenchimento passa por cima.
@@ -186,27 +188,27 @@ export function animateCaptions(tl: gsap.core.Timeline, root: HTMLElement, { at,
     q(".cap-create-stroke .ch"),
     { ...hidden, scale: 1 + 0.5 * m, filter: blur(10) },
     { autoAlpha: 1, scale: 1, filter: blur(0), duration: span(0.7), stagger: span(0.035), ease: "power3.out" },
-    at(52.6),
+    at(47.4),
   )
-    .fromTo(q(".cap-create-fill"), { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: span(1.3), ease: "power2.inOut" }, at(53.4))
-    .to(q(".cap-create"), { autoAlpha: 0, filter: blur(10), duration: span(0.5), ease: "power2.in" }, at(54.9));
+    .fromTo(q(".cap-create-fill"), { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: span(1.8), ease: "power2.inOut" }, at(48.6))
+    .to(q(".cap-create"), { autoAlpha: 0, filter: blur(10), duration: span(0.8), ease: "power2.in" }, at(53));
 
   // 6. Do software ao hardware: cores separadas como num prisma e depois alinhadas.
   const split = 0.06 * window.innerWidth * m;
-  tl.fromTo(q(".cap-prism"), hidden, { ...shown, duration: span(0.8) }, at(69.3))
-    .fromTo(q(".cap-prism-r"), { x: -split, filter: blur(6) }, { x: 0, filter: blur(0), duration: span(2.4), ease: "power3.out" }, at(69.3))
-    .fromTo(q(".cap-prism-c"), { x: split, filter: blur(6) }, { x: 0, filter: blur(0), duration: span(2.4), ease: "power3.out" }, at(69.3))
-    .fromTo(q(".cap-prism-w"), { opacity: 0 }, { opacity: 1, duration: span(1.4) }, at(70.6))
-    .to(q(".cap-prism-r"), { x: split * 0.6, duration: span(1.2), ease: "power2.in" }, at(76))
-    .to(q(".cap-prism-c"), { x: -split * 0.6, duration: span(1.2), ease: "power2.in" }, at(76))
-    .to(q(".cap-prism"), { autoAlpha: 0, filter: blur(8), duration: span(1.2), ease: "power2.in" }, at(76.2));
+  tl.fromTo(q(".cap-prism"), hidden, { ...shown, duration: span(0.8) }, at(14.3))
+    .fromTo(q(".cap-prism-r"), { x: -split, filter: blur(6) }, { x: 0, filter: blur(0), duration: span(2.4), ease: "power3.out" }, at(14.3))
+    .fromTo(q(".cap-prism-c"), { x: split, filter: blur(6) }, { x: 0, filter: blur(0), duration: span(2.4), ease: "power3.out" }, at(14.3))
+    .fromTo(q(".cap-prism-w"), { opacity: 0 }, { opacity: 1, duration: span(1.4) }, at(15.6))
+    .to(q(".cap-prism-r"), { x: split * 0.6, duration: span(1.2), ease: "power2.in" }, at(18.6))
+    .to(q(".cap-prism-c"), { x: -split * 0.6, duration: span(1.2), ease: "power2.in" }, at(18.6))
+    .to(q(".cap-prism"), { autoAlpha: 0, filter: blur(8), duration: span(1.2), ease: "power2.in" }, at(18.8));
 
   // 7. Desde 1975, letra a letra abaixo do logo.
   tl.fromTo(
     q(".cap-since .ch"),
     { ...hidden, y: 10 * m },
     { autoAlpha: 1, y: 0, duration: span(0.8), stagger: span(0.12), ease: "power2.out" },
-    at(86),
+    at(72.6),
   );
 }
 

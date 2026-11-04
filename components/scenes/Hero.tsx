@@ -10,7 +10,7 @@ import { animateCaptions, floatChips, HeroCaptions } from "@/components/HeroCapt
 
 // Duração do scroll, em alturas de tela.
 const INTRO_SCREENS = 1.5; // logo se abre e o vídeo entra
-const VIDEO_SCREENS = 45; // percorre o vídeo inteiro (90 s ≈ 4,5 s de vídeo por tela)
+const VIDEO_SCREENS = 37.5; // percorre o vídeo inteiro (75 s ≈ 2 s de vídeo por tela)
 const END_HOLD_SCREENS = 0; // pausa no frame final (logo sobre preto)
 
 // Trecho do progresso da cena em que o vídeo vai do primeiro ao último frame.
