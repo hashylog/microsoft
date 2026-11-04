@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
 import { getMedia, type MediaSlotId } from "@/lib/media";
+import { preload } from "@/lib/preload";
 
 export type MediaHandle = {
   /** Progresso 0–1 vindo do ScrollTrigger da cena. */
@@ -41,6 +42,20 @@ export function ScrollMedia({ slot, ref, range = [0, 1], tone = "auto", compact,
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const images = useRef<HTMLImageElement[]>([]);
+  // Vídeo baixado inteiro para a memória (ver lib/preload); até lá, o <video> fica sem src.
+  const videoSrc = source?.kind === "video" ? source.src : null;
+  const [memorySrc, setMemorySrc] = useState<{ from: string; url: string } | null>(null);
+
+  useEffect(() => {
+    if (!videoSrc) return;
+    let alive = true;
+    preload(videoSrc).then((url) => {
+      if (alive) setMemorySrc({ from: videoSrc, url });
+    });
+    return () => {
+      alive = false;
+    };
+  }, [videoSrc]);
 
   const draw = useCallback(() => {
     raf.current = 0;
@@ -125,7 +140,7 @@ export function ScrollMedia({ slot, ref, range = [0, 1], tone = "auto", compact,
         <video
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover"
-          src={source.src}
+          src={memorySrc?.from === source.src ? memorySrc.url : undefined}
           poster={source.poster}
           muted
           playsInline

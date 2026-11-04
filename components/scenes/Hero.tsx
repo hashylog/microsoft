@@ -6,6 +6,7 @@ import { holdUntil, pinTimeline, useScene } from "@/lib/scene";
 import { ScrollMedia, type MediaHandle } from "@/components/ScrollMedia";
 import { RevealText } from "@/components/RevealText";
 import { MEDIA } from "@/lib/media";
+import { whenLoaded } from "@/lib/loader";
 import { animateCaptions, floatChips, HeroCaptions } from "@/components/HeroCaptions";
 
 // Duração do scroll, em alturas de tela.
@@ -42,13 +43,14 @@ export function Hero() {
     const stage = q(".hero-stage")[0] as HTMLElement;
     const quads = q<HTMLElement>(".hero-quad");
 
-    // Abertura: o único movimento que não depende do scroll.
-    const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
+    // Abertura: os quadrados já vêm preenchidos da tela de carregamento (mesma
+    // posição); quando ela some, o título e o subtítulo entram.
+    const intro = gsap.timeline({ paused: true, defaults: { ease: "expo.out" } });
     intro
-      .from(q(".hero-quad-fill"), { scale: 0, duration: 1.1, stagger: 0.08 })
-      .from(q(".hero-title .rw"), { yPercent: 110, duration: 1.2, stagger: 0.06 }, 0.25)
-      .from(q(".hero-sub"), { autoAlpha: 0, y: reduce ? 0 : 12, duration: 1 }, 0.7);
+      .from(q(".hero-title .rw"), { yPercent: 110, duration: 1.2, stagger: 0.06 }, 0)
+      .from(q(".hero-sub"), { autoAlpha: 0, y: reduce ? 0 : 12, duration: 1 }, 0.45);
     if (reduce) intro.progress(1);
+    const stopWaiting = whenLoaded(() => intro.play());
 
     // Cada quadrado do logo cresce até ocupar um quarto da tela.
     const toQuadrant = (i: number) => {
@@ -96,7 +98,7 @@ export function Hero() {
     });
     holdUntil(tl, total);
 
-    if (reduce) return;
+    if (reduce) return stopWaiting;
 
     // Vídeo "vivo": mesmo com o scroll parado, o quadro respira, flutua e
     // acompanha o mouse. A camada é maior que a tela para as bordas não aparecerem.
@@ -163,6 +165,7 @@ export function Hero() {
     });
 
     return () => {
+      stopWaiting();
       window.removeEventListener("pointermove", onPointer);
       gsap.ticker.remove(updateBlur);
       live.style.filter = "";

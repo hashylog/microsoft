@@ -1,4 +1,5 @@
 import { SmoothScroll } from "@/components/SmoothScroll";
+import { Loader } from "@/components/Loader";
 import { ChapterNav } from "@/components/ChapterNav";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/scenes/Hero";
@@ -11,6 +12,8 @@ export default function Home() {
   return (
     <>
       <SmoothScroll />
+      {/* Depois do SmoothScroll: precisa do Lenis já criado para travar o scroll. */}
+      <Loader />
       <main>
         <Hero />
         <About />

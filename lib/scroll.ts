@@ -8,6 +8,10 @@ export function setLenis(lenis: Lenis | null) {
   instance = lenis;
 }
 
+export function getLenis() {
+  return instance;
+}
+
 /** Rola até um seletor ou posição, usando Lenis quando ativo. */
 export function scrollToTarget(target: string | number) {
   if (instance) {
