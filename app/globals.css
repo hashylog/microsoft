@@ -110,6 +110,27 @@ body {
   grid-area: 1 / 1;
 }
 
+/* Granulação de filme animada sobre o vídeo do Hero: mantém o quadro "vivo"
+   mesmo com o scroll parado. Maior que a tela para poder se deslocar. */
+.film-grain {
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.4 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  animation: film-grain 0.8s steps(1) infinite;
+}
+@keyframes film-grain {
+  0% { transform: translate(0, 0); }
+  17% { transform: translate(-6%, 3%); }
+  33% { transform: translate(4%, -7%); }
+  50% { transform: translate(-3%, 8%); }
+  67% { transform: translate(7%, 2%); }
+  83% { transform: translate(-8%, -4%); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

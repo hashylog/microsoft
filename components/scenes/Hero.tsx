@@ -1,19 +1,27 @@
 "use client";
 
 import { useRef } from "react";
-import { gsap } from "@/lib/gsap";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { holdUntil, pinTimeline, useScene } from "@/lib/scene";
 import { ScrollMedia, type MediaHandle } from "@/components/ScrollMedia";
 import { RevealText } from "@/components/RevealText";
 
 // Duração do scroll, em alturas de tela.
-const INTRO_SCREENS = 1.6; // logo se abre e o vídeo entra
-const VIDEO_SCREENS = 20; // percorre o vídeo inteiro (90 s ≈ 4,5 s de vídeo por tela)
-const END_HOLD_SCREENS = 0.6; // pausa no frame final (logo sobre preto)
+const INTRO_SCREENS = 1.5; // logo se abre e o vídeo entra
+const VIDEO_SCREENS = 45; // percorre o vídeo inteiro (90 s ≈ 4,5 s de vídeo por tela)
+const END_HOLD_SCREENS = 0; // pausa no frame final (logo sobre preto)
 
 // Trecho do progresso da cena em que o vídeo vai do primeiro ao último frame.
 const VIDEO_TOTAL = INTRO_SCREENS + VIDEO_SCREENS + END_HOLD_SCREENS;
 const VIDEO_RANGE: [number, number] = [INTRO_SCREENS / VIDEO_TOTAL, (INTRO_SCREENS + VIDEO_SCREENS) / VIDEO_TOTAL];
+
+// Desfoque do vídeo quando o scroll para. Qualquer movimento deixa nítido;
+// o desfoque só começa depois de BLUR_DELAY_MS parado e cresce até MAX_BLUR
+// ao longo de BLUR_IN_MS. Assim, pausas curtas entre roladas não desfocam.
+const MAX_BLUR = 14; // px
+const BLUR_DELAY_MS = 500;
+const BLUR_IN_MS = 1200;
+const MOVING_SPEED = 40; // px/s: abaixo disso o scroll conta como parado
 
 const QUADS = [
   { color: "var(--ms-red)", col: 0, row: 0 },
@@ -77,6 +85,71 @@ export function Hero() {
         INTRO_SCREENS * 0.75,
       );
     holdUntil(tl, total);
+
+    if (reduce) return;
+
+    // Vídeo "vivo": mesmo com o scroll parado, o quadro respira, flutua e
+    // acompanha o mouse. A camada é maior que a tela para as bordas não aparecerem.
+    const live = q(".hero-live")[0] as HTMLElement;
+    gsap.set(live, { transformPerspective: 1400 });
+    const idle = [
+      gsap.to(live, { scale: 1.035, duration: 6, ease: "sine.inOut", repeat: -1, yoyo: true }),
+      gsap.to(live, { yPercent: -0.7, duration: 4.4, ease: "sine.inOut", repeat: -1, yoyo: true }),
+      gsap.to(live, { rotation: 0.25, duration: 7.3, ease: "sine.inOut", repeat: -1, yoyo: true }),
+    ];
+    const follow = { duration: 1.4, ease: "power3.out" };
+    const moveX = gsap.quickTo(live, "x", follow);
+    const moveY = gsap.quickTo(live, "y", follow);
+    const tiltX = gsap.quickTo(live, "rotationX", follow);
+    const tiltY = gsap.quickTo(live, "rotationY", follow);
+    const onPointer = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      const nx = e.clientX / window.innerWidth - 0.5;
+      const ny = e.clientY / window.innerHeight - 0.5;
+      moveX(-nx * 26);
+      moveY(-ny * 18);
+      tiltY(nx * 2.2);
+      tiltX(-ny * 1.6);
+    };
+    window.addEventListener("pointermove", onPointer);
+
+    // Desfoque ao parar: qualquer movimento foca rápido; parado por um tempo, desfoca aos poucos.
+    let blur = 0;
+    let shown = -1;
+    let lastY = window.scrollY;
+    let movedAt = performance.now();
+    const updateBlur = (_time: number, dt: number) => {
+      const now = performance.now();
+      const y = window.scrollY;
+      const speed = (Math.abs(y - lastY) / Math.max(dt, 1)) * 1000;
+      lastY = y;
+      if (speed > MOVING_SPEED) movedAt = now;
+      if (!tl.scrollTrigger?.isActive) return;
+      const still = now - movedAt - BLUR_DELAY_MS;
+      const target = still > 0 ? MAX_BLUR * Math.min(1, still / BLUR_IN_MS) : 0;
+      // Focar é rápido; desfocar já é gradual pela rampa de BLUR_IN_MS.
+      blur = target < blur ? blur + (target - blur) * 0.3 : target;
+      const px = Math.round(blur * 4) / 4;
+      if (px !== shown) {
+        shown = px;
+        live.style.filter = px > 0 ? `blur(${px}px)` : "";
+      }
+    };
+    gsap.ticker.add(updateBlur);
+
+    // Só anima enquanto o Hero está na tela.
+    ScrollTrigger.create({
+      trigger: root.current,
+      start: "top top",
+      end: "bottom top",
+      onToggle: (self) => idle.forEach((t) => (self.isActive ? t.resume() : t.pause())),
+    });
+
+    return () => {
+      window.removeEventListener("pointermove", onPointer);
+      gsap.ticker.remove(updateBlur);
+      live.style.filter = "";
+    };
   });
 
   return (
@@ -107,8 +180,11 @@ export function Hero() {
           </p>
         </div>
 
-        <div className="hero-media invisible absolute inset-0 bg-black">
-          <ScrollMedia ref={media} slot="HERO_VIDEO" range={VIDEO_RANGE} tone="dark" className="h-full w-full bg-black" />
+        <div className="hero-media invisible absolute inset-0 overflow-hidden bg-black">
+          <div className="hero-live absolute -inset-[4%] will-change-transform">
+            <ScrollMedia ref={media} slot="HERO_VIDEO" range={VIDEO_RANGE} tone="dark" className="h-full w-full bg-black" />
+          </div>
+          <div className="film-grain" aria-hidden />
         </div>
       </div>
     </section>

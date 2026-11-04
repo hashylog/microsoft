@@ -15,7 +15,8 @@ export type SceneContext = {
  */
 export function useScene(
   scope: RefObject<HTMLElement | null>,
-  build: (ctx: SceneContext) => void,
+  /** Pode devolver uma função de limpeza (ex.: remover listeners da window). */
+  build: (ctx: SceneContext) => void | (() => void),
 ) {
   useGSAP(
     () => {
@@ -28,7 +29,7 @@ export function useScene(
         },
         (c) => {
           const { reduce, mobile } = c.conditions ?? {};
-          build({ reduce: !!reduce, mobile: !!mobile });
+          return build({ reduce: !!reduce, mobile: !!mobile });
         },
       );
       return () => mm.revert();
