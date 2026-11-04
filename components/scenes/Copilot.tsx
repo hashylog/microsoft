@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, type CSSProperties } from "react";
 import { gsap } from "@/lib/gsap";
+import { THEMES } from "@/lib/chapters";
 import { beatSequence, enterTimeline, holdUntil, pinTimeline, useScene } from "@/lib/scene";
 import { ScrollMedia, type MediaHandle } from "@/components/ScrollMedia";
 import { RevealText } from "@/components/RevealText";
@@ -69,7 +70,14 @@ export function Copilot() {
   });
 
   return (
-    <section ref={root} id="copilot" aria-labelledby="copilot-title">
+    // Tema claro próprio e fundo opaco: a seção sobe por cima do Azure, que fica fixado atrás.
+    <section
+      ref={root}
+      id="copilot"
+      aria-labelledby="copilot-title"
+      className="relative z-10 shadow-[0_-24px_60px_rgba(0,0,0,0.35)]"
+      style={{ ...THEMES.light, background: "var(--bg)", color: "var(--fg)" } as CSSProperties}
+    >
       <div className="cp-stage relative grid h-svh grid-rows-[1fr_auto] items-center gap-6 overflow-hidden px-4 pt-20 pb-16 md:grid-cols-12 md:grid-rows-1 md:px-12 md:py-0">
         <div className="cp-text beats md:col-span-4 md:col-start-1 md:row-start-1">
           {BEATS.map((beat, i) => (

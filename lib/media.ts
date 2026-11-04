@@ -36,12 +36,6 @@ export const MEDIA = {
     frames: 2160,
     source: { kind: "video", src: "/videos/hero_video_scrub.mp4" },
   },
-  AZURE_DATACENTER_FLYTHROUGH: {
-    title: "Voo pelo datacenter",
-    description: "Câmera atravessando corredores de servidores, sob a rede de regiões.",
-    frames: 280,
-    source: null,
-  },
   COPILOT_ANIMATION: {
     title: "Animação do Copilot",
     description: "Loop do símbolo do Copilot reagindo ao texto digitado.",
