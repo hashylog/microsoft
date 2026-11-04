@@ -5,6 +5,8 @@ import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { holdUntil, pinTimeline, useScene } from "@/lib/scene";
 import { ScrollMedia, type MediaHandle } from "@/components/ScrollMedia";
 import { RevealText } from "@/components/RevealText";
+import { MEDIA } from "@/lib/media";
+import { animateCaptions, floatChips, HeroCaptions } from "@/components/HeroCaptions";
 
 // Duração do scroll, em alturas de tela.
 const INTRO_SCREENS = 1.5; // logo se abre e o vídeo entra
@@ -13,6 +15,7 @@ const END_HOLD_SCREENS = 0; // pausa no frame final (logo sobre preto)
 
 // Trecho do progresso da cena em que o vídeo vai do primeiro ao último frame.
 const VIDEO_TOTAL = INTRO_SCREENS + VIDEO_SCREENS + END_HOLD_SCREENS;
+const VIDEO_SECONDS = MEDIA.HERO_VIDEO.frames / 24;
 const VIDEO_RANGE: [number, number] = [INTRO_SCREENS / VIDEO_TOTAL, (INTRO_SCREENS + VIDEO_SCREENS) / VIDEO_TOTAL];
 
 // Desfoque do vídeo quando o scroll para. Qualquer movimento deixa nítido;
@@ -84,6 +87,13 @@ export function Hero() {
         { autoAlpha: 1, scale: 1, duration: INTRO_SCREENS * 0.25, ease: "power2.out" },
         INTRO_SCREENS * 0.75,
       );
+
+    // Legendas posicionadas em segundos do vídeo.
+    animateCaptions(tl, root.current!, {
+      at: (s) => INTRO_SCREENS + (s / VIDEO_SECONDS) * VIDEO_SCREENS,
+      span: (s) => (s / VIDEO_SECONDS) * VIDEO_SCREENS,
+      reduce,
+    });
     holdUntil(tl, total);
 
     if (reduce) return;
@@ -96,12 +106,17 @@ export function Hero() {
       gsap.to(live, { scale: 1.035, duration: 6, ease: "sine.inOut", repeat: -1, yoyo: true }),
       gsap.to(live, { yPercent: -0.7, duration: 4.4, ease: "sine.inOut", repeat: -1, yoyo: true }),
       gsap.to(live, { rotation: 0.25, duration: 7.3, ease: "sine.inOut", repeat: -1, yoyo: true }),
+      ...floatChips(root.current!),
     ];
     const follow = { duration: 1.4, ease: "power3.out" };
     const moveX = gsap.quickTo(live, "x", follow);
     const moveY = gsap.quickTo(live, "y", follow);
     const tiltX = gsap.quickTo(live, "rotationX", follow);
     const tiltY = gsap.quickTo(live, "rotationY", follow);
+    // Legendas andam no sentido oposto ao vídeo: dá profundidade entre as camadas.
+    const captions = q(".hero-captions")[0];
+    const capX = gsap.quickTo(captions, "x", follow);
+    const capY = gsap.quickTo(captions, "y", follow);
     const onPointer = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
       const nx = e.clientX / window.innerWidth - 0.5;
@@ -110,6 +125,8 @@ export function Hero() {
       moveY(-ny * 18);
       tiltY(nx * 2.2);
       tiltX(-ny * 1.6);
+      capX(nx * 18);
+      capY(ny * 12);
     };
     window.addEventListener("pointermove", onPointer);
 
@@ -184,6 +201,7 @@ export function Hero() {
           <div className="hero-live absolute -inset-[4%] will-change-transform">
             <ScrollMedia ref={media} slot="HERO_VIDEO" range={VIDEO_RANGE} tone="dark" className="h-full w-full bg-black" />
           </div>
+          <HeroCaptions />
           <div className="film-grain" aria-hidden />
         </div>
       </div>
