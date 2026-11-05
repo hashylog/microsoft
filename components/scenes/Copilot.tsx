@@ -128,11 +128,21 @@ export function Copilot() {
       .fromTo(orbit, { r: 0, a: 0 }, { r: 1, a: 1, duration: 1.6, ease: "power3.out" }, 12.6)
       .fromTo(q(".cp-everywhere"), { autoAlpha: 0, y: 24 * m }, { autoAlpha: 1, y: 0, duration: 0.7 }, 12.9);
 
-    // Saída: a órbita se abre e o orbe cresce até cobrir a tela, entregando para o Futuro.
+    // Saída: a órbita se abre e a luz do orbe se espalha até cobrir a tela, entregando para o Futuro.
+    // O orbe em si cresce pouco: escalar a esfera (com o brilho borrado) até cobrir a tela criava
+    // uma camada gigante na GPU, que ficava com artefatos ao voltar o scroll. Quem cobre a tela é
+    // `.cp-flood`, um círculo recortado por clip-path, sem filtro e do tamanho da própria tela.
     tl.to(q(".cp-everywhere"), { autoAlpha: 0, duration: 0.5 }, 14.8)
       .to(orbit, { r: 2.4, a: 0, duration: 1.2, ease: "power2.in" }, 14.8)
-      .to(q(".cp-orb"), { scale: reduce ? 1 : 9, duration: 1.4, ease: "power2.in" }, 15)
-      .to(q(".cp-orb"), { autoAlpha: 0, duration: 0.5 }, 16.1);
+      .to(q(".cp-orb"), { scale: reduce ? 0.62 : 1.4, autoAlpha: 0, duration: 1.1, ease: "power2.in" }, 15)
+      .fromTo(
+        q(".cp-flood"),
+        // Começa invisível: o estado inicial de um fromTo é aplicado já ao montar (e ao voltar o scroll).
+        { autoAlpha: 0, clipPath: `circle(${reduce ? 150 : 18}% at 50% 50%)` },
+        { autoAlpha: 1, clipPath: "circle(150% at 50% 50%)", duration: 1.2, ease: "power2.in" },
+        15,
+      )
+      .to(q(".cp-flood"), { autoAlpha: 0, duration: 0.5 }, 16.1);
 
     holdUntil(tl, UNITS);
 
@@ -211,7 +221,7 @@ export function Copilot() {
       <div className="cp-stage relative h-svh overflow-hidden">
         {/* Orbe */}
         <div className="cp-orb-wrap absolute top-1/2 left-1/2 z-[2] -translate-x-1/2 -translate-y-1/2">
-          <div className="cp-orb relative size-[min(62vmin,560px)] will-change-transform">
+          <div className="cp-orb relative size-[min(62vmin,560px)]">
             <div
               className="cp-glow absolute -inset-[18%] rounded-full opacity-60 blur-3xl"
               style={{ background: `conic-gradient(${[...AURORA, AURORA[0]].join(", ")})` }}
@@ -241,6 +251,15 @@ export function Copilot() {
             />
           </div>
         </div>
+
+        {/* Luz do orbe cobrindo a tela na saída */}
+        <div
+          className="cp-flood invisible absolute inset-0 z-[2]"
+          style={{
+            background: `radial-gradient(circle at 50% 50%, #fff 0%, ${AURORA[5]}55 30%, ${AURORA[1]}44 55%, ${AURORA[4]}33 75%, var(--bg) 100%)`,
+          }}
+          aria-hidden
+        />
 
         {/* Apps em órbita */}
         {APPS.map((app) => (
