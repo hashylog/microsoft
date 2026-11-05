@@ -1,5 +1,6 @@
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { Loader } from "@/components/Loader";
+import { Cursor } from "@/components/Cursor";
 import { ChapterNav } from "@/components/ChapterNav";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/scenes/Hero";
@@ -24,6 +25,7 @@ export default function Home() {
       <Footer />
       {/* Depois das cenas: os gatilhos de capítulo dependem dos pins já criados. */}
       <ChapterNav />
+      <Cursor />
     </>
   );
 }

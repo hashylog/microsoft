@@ -31,6 +31,17 @@
 html {
   background: var(--bg);
   color: var(--fg);
+  /* Sem barra de rolagem: a navegação pelos capítulos (ChapterNav) já mostra onde se está. */
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
+/* Cursor próprio (components/Cursor.tsx): esconde o do sistema só quando ele está ativo. */
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
 }
 
 body {
