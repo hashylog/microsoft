@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { holdUntil, pinTimeline, useScene } from "@/lib/scene";
 import { RevealText } from "@/components/RevealText";
@@ -83,18 +84,30 @@ export function Future() {
           <h2 id="futuro-title" className="ft-title t-title mt-10 max-w-[14ch] md:mt-14">
             <RevealText text="O próximo capítulo ainda está sendo escrito." />
           </h2>
-          <button
-            type="button"
-            onClick={() => scrollToTarget(0)}
-            className="ft-cta group mt-10 inline-flex items-center gap-3 rounded-full border border-[var(--fg)] px-6 py-3 text-sm font-semibold transition-colors hover:bg-[var(--fg)] hover:text-[var(--bg)]"
-          >
-            <span className="grid grid-cols-2 gap-px transition-transform duration-500 group-hover:rotate-90" aria-hidden>
-              {SQUARES.map((sq) => (
-                <span key={sq.color} className="size-1.5" style={{ background: sq.color }} />
-              ))}
-            </span>
-            Ver a história de novo
-          </button>
+          {/* Os dois botões entram juntos (.ft-cta no grupo). */}
+          <div className="ft-cta mt-10 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => scrollToTarget(0)}
+              className="group inline-flex items-center gap-3 rounded-full border border-[var(--fg)] px-6 py-3 text-sm font-semibold transition-colors hover:bg-[var(--fg)] hover:text-[var(--bg)]"
+            >
+              <span className="grid grid-cols-2 gap-px transition-transform duration-500 group-hover:rotate-90" aria-hidden>
+                {SQUARES.map((sq) => (
+                  <span key={sq.color} className="size-1.5" style={{ background: sq.color }} />
+                ))}
+              </span>
+              Ver a história de novo
+            </button>
+            <Link
+              href="/quiz"
+              className="group inline-flex items-center gap-3 rounded-full border border-[var(--fg)] bg-[var(--fg)] px-6 py-3 text-sm font-semibold text-[var(--bg)] transition-colors hover:bg-transparent hover:text-[var(--fg)]"
+            >
+              Fazer o quiz
+              <span className="transition-transform duration-300 group-hover:translate-x-1" aria-hidden>
+                →
+              </span>
+            </Link>
+          </div>
         </div>
       </div>
     </section>
